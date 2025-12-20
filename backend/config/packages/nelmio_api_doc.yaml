@@ -1,0 +1,14 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Leaseweb Server API
+            description: REST API for listing and filtering servers
+            version: 1.0.0
+        servers:
+            - url: /api
+              description: API server
+    areas:
+        default:
+            path_patterns:
+                - ^/api(?!/doc$)
+

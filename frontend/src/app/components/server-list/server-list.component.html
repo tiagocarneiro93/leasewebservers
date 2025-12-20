@@ -1,0 +1,76 @@
+@if (loading) {
+  <div class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading servers...</p>
+  </div>
+} @else if (servers.length === 0) {
+  <div class="empty-state">
+    <mat-icon>dns</mat-icon>
+    <h2>No servers found</h2>
+    <p>Try adjusting your filters to see more results.</p>
+  </div>
+} @else {
+  <div class="server-grid">
+    @for (server of servers; track server.id) {
+      <mat-card class="server-card">
+        <mat-card-header>
+          <mat-card-title class="server-model">{{ server.model }}</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="specs-grid">
+            <div class="spec-item">
+              <mat-icon>memory</mat-icon>
+              <div class="spec-content">
+                <span class="spec-label">RAM</span>
+                <span class="spec-value">{{ formatRam(server.ramSizeGb) }}</span>
+              </div>
+            </div>
+
+            <div class="spec-item">
+              <mat-icon>storage</mat-icon>
+              <div class="spec-content">
+                <span class="spec-label">Storage</span>
+                <span class="spec-value">{{ formatStorage(server.storageTotalGb) }}</span>
+              </div>
+            </div>
+
+            <div class="spec-item">
+              <mat-icon>disc_full</mat-icon>
+              <div class="spec-content">
+                <span class="spec-label">Disk Type</span>
+                <span class="spec-value chip" [ngClass]="getHddTypeClass(server.hddType)">
+                  {{ server.hddType }}
+                </span>
+              </div>
+            </div>
+
+            <div class="spec-item">
+              <mat-icon>location_on</mat-icon>
+              <div class="spec-content">
+                <span class="spec-label">Location</span>
+                <span class="spec-value location">
+                  {{ getLocationDisplay(server.location) }}
+                  <small>{{ getLocationCode(server.location) }}</small>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hdd-detail">
+            <mat-icon>developer_board</mat-icon>
+            <span>{{ server.hdd }}</span>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <div class="price-container">
+            <span class="price">{{ server.formattedPrice }}</span>
+            <span class="price-period">/month</span>
+          </div>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+}
+

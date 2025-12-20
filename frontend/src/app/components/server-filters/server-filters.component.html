@@ -1,0 +1,135 @@
+<div class="filters-container">
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>filter_list</mat-icon>
+        Filters
+        @if (hasActiveFilters()) {
+          <span class="filter-badge">{{ getActiveFilterCount() }}</span>
+        }
+      </mat-card-title>
+      @if (hasActiveFilters()) {
+        <button mat-stroked-button color="warn" (click)="clearFilters()" class="clear-btn">
+          <mat-icon>clear</mat-icon>
+          Clear All
+        </button>
+      }
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Storage Filter -->
+      <div class="filter-section">
+        <h3 class="filter-title">
+          <mat-icon>storage</mat-icon>
+          Storage
+        </h3>
+        <div class="storage-slider-container">
+          <div class="slider-labels">
+            <span class="min-label">Min: {{ getStorageDisplayValue(storageMinValue) }}</span>
+            <span class="max-label">Max: {{ getStorageDisplayValue(storageMaxValue) }}</span>
+          </div>
+
+          <mat-slider
+            class="storage-slider"
+            [min]="0"
+            [max]="getStorageMaxIndex()"
+            [step]="1"
+            [discrete]="true"
+            [displayWith]="formatStorageLabel">
+            <input matSliderStartThumb [(ngModel)]="storageMinIndex" (valueChange)="onStorageSliderChange()">
+            <input matSliderEndThumb [(ngModel)]="storageMaxIndex" (valueChange)="onStorageSliderChange()">
+          </mat-slider>
+          <div class="slider-range-labels">
+            <span>0 GB</span>
+            <span>72TB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RAM Filter -->
+      <div class="filter-section">
+        <h3 class="filter-title">
+          <mat-icon>memory</mat-icon>
+          RAM
+        </h3>
+        <div class="checkbox-grid ram-grid">
+          @for (option of filterOptions?.ram; track option.value) {
+            <mat-checkbox
+              [checked]="isRamSelected(option.value)"
+              (change)="onRamChange(option.value, $event.checked)"
+              color="primary">
+              {{ option.label }}
+            </mat-checkbox>
+          }
+        </div>
+      </div>
+
+      <!-- HDD Type Filter -->
+      <div class="filter-section">
+        <h3 class="filter-title">
+          <mat-icon>disc_full</mat-icon>
+          Disk Type
+        </h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Select disk type</mat-label>
+          <mat-select [(ngModel)]="selectedHddType" (selectionChange)="onHddTypeChange()">
+            <mat-option value="">All Types</mat-option>
+            @for (type of filterOptions?.hddType; track type) {
+              <mat-option [value]="type">{{ type }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Location Filter -->
+      <div class="filter-section">
+        <h3 class="filter-title">
+          <mat-icon>location_on</mat-icon>
+          Location
+        </h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Select location</mat-label>
+          <mat-select [(ngModel)]="selectedLocation" (selectionChange)="onLocationChange()">
+            <mat-option value="">All Locations</mat-option>
+            @for (loc of filterOptions?.location; track loc) {
+              <mat-option [value]="loc">{{ loc }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Sorting -->
+      <div class="filter-section sorting-section">
+        <h3 class="filter-title">
+          <mat-icon>sort</mat-icon>
+          Sort By
+        </h3>
+        <div class="sorting-controls">
+          <mat-form-field appearance="outline" class="sort-field">
+            <mat-label>Sort by</mat-label>
+            <mat-select [(ngModel)]="selectedSort" (selectionChange)="onSortChange()" panelWidth="auto">
+              @for (option of SORT_OPTIONS; track option.value) {
+                <mat-option [value]="option.value">
+                  <mat-icon class="option-icon">{{ option.icon }}</mat-icon>
+                  {{ option.label }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="order-field">
+            <mat-label>Order</mat-label>
+            <mat-select [(ngModel)]="selectedOrder" (selectionChange)="onOrderChange()" panelWidth="auto">
+              @for (option of ORDER_OPTIONS; track option.value) {
+                <mat-option [value]="option.value">
+                  <mat-icon class="option-icon">{{ option.icon }}</mat-icon>
+                  {{ option.label }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+

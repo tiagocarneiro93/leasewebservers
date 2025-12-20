@@ -1,0 +1,56 @@
+<div class="app-container">
+  <!-- Header -->
+  <mat-toolbar class="app-header">
+    <button mat-icon-button (click)="toggleSidenav()" class="menu-button">
+      <mat-icon>{{ sidenavOpen ? 'menu_open' : 'menu' }}</mat-icon>
+    </button>
+    <div class="logo">
+      <mat-icon>dns</mat-icon>
+      <span class="logo-text">Leaseweb</span>
+      <span class="logo-subtitle">Server Explorer</span>
+    </div>
+    <span class="spacer"></span>
+    @if (meta) {
+      <span class="server-count">{{ meta.total }} servers available</span>
+    }
+  </mat-toolbar>
+
+  <!-- Main Content -->
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav 
+      #sidenav 
+      mode="side" 
+      [opened]="sidenavOpen"
+      class="sidenav">
+      <app-server-filters
+        [filterOptions]="filterOptions"
+        (filtersChange)="onFiltersChange($event)">
+      </app-server-filters>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="main-content">
+      @if (error) {
+        <div class="error-message">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ error }}</p>
+          <button mat-stroked-button (click)="loadServers()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+        </div>
+      } @else {
+        <app-server-list
+          [servers]="servers"
+          [loading]="loading"
+          [total]="meta?.total || 0">
+        </app-server-list>
+
+        <app-pagination
+          [meta]="meta"
+          (pageChange)="onPageChange($event)"
+          (limitChange)="onLimitChange($event)">
+        </app-pagination>
+      }
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

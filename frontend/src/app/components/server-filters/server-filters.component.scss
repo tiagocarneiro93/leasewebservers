@@ -1,0 +1,338 @@
+.filters-container {
+  width: 100%;
+}
+
+.filter-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 16px 0;
+    margin-bottom: 8px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.25rem;
+      margin: 0;
+      color: var(--text-primary);
+
+      mat-icon {
+        color: var(--accent-color);
+      }
+
+      .filter-badge {
+        background: var(--accent-color);
+        color: #000;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .clear-btn {
+    font-size: 0.875rem;
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+    }
+  }
+}
+
+.filter-section {
+  margin-bottom: 24px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.filter-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  mat-icon {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    color: var(--text-muted);
+  }
+}
+
+.checkbox-grid {
+  display: grid;
+  gap: 8px;
+
+  &.storage-grid {
+    grid-template-columns: repeat(2, 1fr);
+
+    @media (min-width: 1200px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &.ram-grid {
+    grid-template-columns: repeat(3, 1fr);
+
+    @media (min-width: 1200px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  mat-checkbox {
+    font-size: 0.875rem;
+
+    ::ng-deep {
+      .mdc-form-field {
+        color: var(--text-primary);
+      }
+    }
+  }
+}
+
+// Storage Slider Styles
+.storage-slider-container {
+  padding: 8px 8px 0;
+
+  .slider-value-display {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    padding: 8px 16px;
+    margin-bottom: 8px;
+    background: var(--input-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 8px 16px;
+    background: var(--input-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+
+    span {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent-color);
+    }
+
+    .min-label::before {
+      content: '';
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .max-label::before {
+      content: '';
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+  }
+
+  .storage-slider {
+    width: 100%;
+
+    ::ng-deep {
+      .mdc-slider__track {
+        height: 6px;
+      }
+
+      .mdc-slider__track--inactive {
+        background: var(--border-color);
+        height: 6px;
+      }
+
+      .mdc-slider__track--active {
+        height: 6px;
+      }
+
+      .mdc-slider__track--active_fill {
+        border-color: var(--accent-color);
+      }
+
+      .mdc-slider__thumb-knob {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+      }
+
+      .mdc-slider__value-indicator {
+        background: var(--accent-color);
+        color: #000;
+      }
+
+      .mdc-slider__value-indicator::before {
+        border-top-color: var(--accent-color);
+      }
+    }
+  }
+
+  .slider-range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+}
+
+.full-width {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background: var(--input-bg);
+    }
+
+    .mat-mdc-form-field-flex {
+      height: 56px;
+      align-items: center;
+    }
+
+    // Fix the floating label positioning
+    .mdc-floating-label {
+      color: var(--text-secondary) !important;
+    }
+
+    .mdc-floating-label--float-above {
+      transform: translateY(-106%) scale(0.75) !important;
+      color: var(--accent-color) !important;
+    }
+
+    .mat-mdc-select-value {
+      color: var(--text-primary);
+      padding-top: 4px;
+    }
+
+    .mat-mdc-select-arrow {
+      color: var(--text-secondary);
+    }
+
+    .mat-mdc-form-field-infix {
+      padding-top: 20px !important;
+      padding-bottom: 8px !important;
+    }
+
+    // Ensure outline style works properly
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--border-color);
+    }
+
+    &:hover .mdc-notched-outline__leading,
+    &:hover .mdc-notched-outline__notch,
+    &:hover .mdc-notched-outline__trailing {
+      border-color: var(--text-muted);
+    }
+
+    .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+    .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+    .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+      border-color: var(--accent-color);
+    }
+  }
+}
+
+// Sorting Section Styles
+.sorting-section {
+  border-top: 1px solid var(--border-color);
+  padding-top: 24px;
+  margin-top: 24px;
+
+  .sorting-controls {
+    display: flex;
+    gap: 12px;
+
+    .sort-field {
+      flex: 1;
+    }
+
+    .order-field {
+      flex: 1;
+    }
+
+    mat-form-field {
+      width: 100%;
+
+      ::ng-deep {
+        .mat-mdc-text-field-wrapper {
+          background: var(--input-bg);
+        }
+
+        .mat-mdc-form-field-flex {
+          height: 56px;
+          align-items: center;
+        }
+
+        .mdc-floating-label {
+          color: var(--text-secondary) !important;
+        }
+
+        .mdc-floating-label--float-above {
+          transform: translateY(-106%) scale(0.75) !important;
+          color: var(--accent-color) !important;
+        }
+
+        .mat-mdc-select-value {
+          color: var(--text-primary);
+          padding-top: 4px;
+        }
+
+        .mat-mdc-select-arrow {
+          color: var(--text-secondary);
+        }
+
+        .mat-mdc-form-field-infix {
+          padding-top: 20px !important;
+          padding-bottom: 8px !important;
+        }
+
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: var(--border-color);
+        }
+
+        &:hover .mdc-notched-outline__leading,
+        &:hover .mdc-notched-outline__notch,
+        &:hover .mdc-notched-outline__trailing {
+          border-color: var(--text-muted);
+        }
+      }
+    }
+  }
+
+  .option-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+    margin-right: 8px;
+    vertical-align: middle;
+    color: var(--text-muted);
+  }
+}
+
+// Fix dropdown panel width for sorting options
+::ng-deep .mat-mdc-select-panel {
+  min-width: 150px !important;
+}
+

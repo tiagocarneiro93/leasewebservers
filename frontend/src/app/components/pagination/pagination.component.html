@@ -1,0 +1,57 @@
+@if (meta && meta.total > 0) {
+  <div class="pagination-container">
+    <div class="pagination-info">
+      <span class="results-count">
+        Showing <strong>{{ startItem }}</strong> - <strong>{{ endItem }}</strong> of <strong>{{ meta.total }}</strong> servers
+      </span>
+    </div>
+
+    <div class="pagination-controls">
+      <div class="page-size">
+        <span>Items per page:</span>
+        <mat-form-field appearance="outline" class="page-size-select">
+          <mat-select [value]="meta.limit" (selectionChange)="onPageSizeChange($event.value)">
+            @for (size of pageSizeOptions; track size) {
+              <mat-option [value]="size">{{ size }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="page-nav">
+        <button mat-icon-button 
+                [disabled]="!meta.hasPrevPage"
+                (click)="onFirstPage()"
+                title="First page">
+          <mat-icon>first_page</mat-icon>
+        </button>
+
+        <button mat-icon-button 
+                [disabled]="!meta.hasPrevPage"
+                (click)="onPreviousPage()"
+                title="Previous page">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <span class="page-indicator">
+          Page <strong>{{ meta.page }}</strong> of <strong>{{ meta.totalPages }}</strong>
+        </span>
+
+        <button mat-icon-button 
+                [disabled]="!meta.hasNextPage"
+                (click)="onNextPage()"
+                title="Next page">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+        <button mat-icon-button 
+                [disabled]="!meta.hasNextPage"
+                (click)="onLastPage()"
+                title="Last page">
+          <mat-icon>last_page</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
