@@ -7,6 +7,16 @@ A full-stack application for browsing and filtering dedicated servers with a mod
 ![Angular](https://img.shields.io/badge/Angular-17-DD0031?logo=angular)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)
 
+## 🌐 Live Demo
+
+**[▶ View Live Application](https://leasewebservers-production.up.railway.app/)**
+
+| Resource | URL |
+|----------|-----|
+| Frontend | https://leasewebservers-production.up.railway.app/ |
+| API Docs (Swagger) | https://leasewebservers-production.up.railway.app/api/doc |
+| API Endpoint | https://leasewebservers-production.up.railway.app/api/servers |
+
 ## 🚀 Features
 
 - **RESTful API** built with Symfony 7
@@ -35,8 +45,8 @@ A full-stack application for browsing and filtering dedicated servers with a mod
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd leaseweb-servers
+git clone https://github.com/tiagocarneiro93/leasewebservers.git
+cd leasewebservers
 
 # Start all services
 docker-compose up -d
@@ -223,11 +233,6 @@ leaseweb-servers/
 │   ├── nginx/
 │   ├── php/
 │   └── supervisor/
-├── docs/                       # Documentation
-│   ├── 01-PROJECT-DETAILS.md
-│   ├── 02-RAILWAY-DEPLOYMENT.md
-│   ├── 03-DEMO-RUNBOOK.md
-│   └── 04-CLIENT-REQUIREMENTS.md
 ├── docker-compose.yml          # Development setup
 ├── Dockerfile                  # Production build
 └── README.md
