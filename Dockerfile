@@ -80,12 +80,19 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html
 
-# Create startup script
+# Create startup script with better error handling
 RUN echo '#!/bin/sh' > /start.sh \
-    && echo 'php bin/console doctrine:database:create --if-not-exists --no-interaction 2>/dev/null || true' >> /start.sh \
-    && echo 'php bin/console doctrine:schema:update --force --no-interaction 2>/dev/null || true' >> /start.sh \
-    && echo 'php bin/console doctrine:fixtures:load --no-interaction 2>/dev/null || true' >> /start.sh \
+    && echo 'set -e' >> /start.sh \
+    && echo 'echo "Starting Leaseweb Server Explorer..."' >> /start.sh \
+    && echo 'echo "Creating database..."' >> /start.sh \
+    && echo 'php bin/console doctrine:database:create --if-not-exists --no-interaction || echo "Database exists"' >> /start.sh \
+    && echo 'echo "Updating schema..."' >> /start.sh \
+    && echo 'php bin/console doctrine:schema:update --force --no-interaction' >> /start.sh \
+    && echo 'echo "Loading fixtures..."' >> /start.sh \
+    && echo 'php bin/console doctrine:fixtures:load --no-interaction --append || php bin/console doctrine:fixtures:load --no-interaction' >> /start.sh \
+    && echo 'echo "Warming up cache..."' >> /start.sh \
     && echo 'php bin/console cache:warmup --env=prod --no-debug' >> /start.sh \
+    && echo 'echo "Starting services..."' >> /start.sh \
     && echo 'exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' >> /start.sh \
     && chmod +x /start.sh
 
