@@ -79,6 +79,55 @@ php bin/console doctrine:fixtures:load --no-interaction
 php -S localhost:8000 -t public
 ```
 
+## 📥 Excel Import (Server Data Management)
+
+The application supports direct import from Excel files with **upsert** functionality - updating existing records and creating new ones.
+
+### Import Command
+
+```bash
+cd backend
+
+# Basic import
+php bin/console app:import-servers /path/to/servers.xlsx
+
+# Preview changes without persisting (dry run)
+php bin/console app:import-servers servers.xlsx --dry-run
+
+# Custom batch size for large files
+php bin/console app:import-servers servers.xlsx --batch-size=200
+```
+
+### Supported File Formats
+- `.xlsx` (Excel 2007+)
+- `.xls` (Legacy Excel)
+- `.csv` (Comma-separated values)
+
+### Expected Excel Columns
+
+| Column Name | Alternatives | Description |
+|-------------|--------------|-------------|
+| Model | Server Model | Server model name |
+| RAM | Memory | RAM specification (e.g., "16GBDDR3") |
+| HDD | Storage, Hard Disk | Storage config (e.g., "2x2TBSATA2") |
+| Location | Datacenter | Server location |
+| Price | Cost | Monthly price |
+
+### Upsert Behavior
+
+Records are uniquely identified by: **Model + Location + HDD** combination.
+
+- **Match found** → Existing record is updated with new values
+- **No match** → New record is created
+
+### Large File Handling
+
+The import command is optimized for large Excel files:
+- **Chunk reading**: Processes rows in memory-efficient chunks
+- **Batch flushing**: Persists records in configurable batches (default: 100)
+- **Progress bar**: Visual feedback during long imports
+- **Memory management**: Clears entity manager between batches
+
 ### Frontend (Angular)
 
 ```bash

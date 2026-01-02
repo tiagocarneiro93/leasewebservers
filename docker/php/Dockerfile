@@ -1,17 +1,22 @@
 FROM php:8.2-fpm-alpine
 
-# Install dependencies
+# Install dependencies including GD for PhpSpreadsheet
 RUN apk add --no-cache \
     git \
     unzip \
     libzip-dev \
     icu-dev \
     sqlite-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
     pdo_sqlite \
     zip \
     intl \
-    opcache
+    opcache \
+    gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

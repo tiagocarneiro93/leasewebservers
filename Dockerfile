@@ -35,18 +35,23 @@ RUN composer dump-autoload --optimize --classmap-authoritative
 # Stage 3: Production Image
 FROM php:8.2-fpm-alpine
 
-# Install dependencies
+# Install dependencies including GD for PhpSpreadsheet (Excel import)
 RUN apk add --no-cache \
     nginx \
     supervisor \
     libzip-dev \
     icu-dev \
     sqlite-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
     pdo_sqlite \
     zip \
     intl \
     opcache \
+    gd \
     && rm -rf /var/cache/apk/*
 
 # PHP configuration for production
