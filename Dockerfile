@@ -23,8 +23,8 @@ WORKDIR /app/backend
 # Copy composer files
 COPY backend/composer.json backend/composer.lock ./
 
-# Install dependencies without dev
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+# Install dependencies without dev (ignore ext-gd platform req - it's installed in final stage)
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignore-platform-req=ext-gd
 
 # Copy source code
 COPY backend/ ./
