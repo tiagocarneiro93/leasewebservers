@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\RowIterator;
  * - Upsert logic (update existing or create new records)
  * - Batch processing with configurable batch size
  * - Progress callbacks for CLI feedback
+ * - Automatic cache invalidation after import
  */
 class ExcelImportService
 {
@@ -39,7 +40,7 @@ class ExcelImportService
     }
 
     /**
-     * Import servers from an Excel file
+     * Import servers from an Excel file.
      * 
      * @param string $filePath Path to the Excel file
      * @param int $batchSize Number of records to process before flushing
@@ -126,6 +127,12 @@ class ExcelImportService
             $this->entityManager->flush();
         }
 
+        // Invalidate cache after successful import (data has changed)
+        if (!$dryRun && ($result['created'] > 0 || $result['updated'] > 0)) {
+            $this->serverRepository->invalidateCache();
+            $this->notify($progressCallback, $processed, $totalRows, "Cache invalidated.");
+        }
+
         // Release spreadsheet memory
         $spreadsheet->disconnectWorksheets();
         unset($spreadsheet);
@@ -136,7 +143,7 @@ class ExcelImportService
     }
 
     /**
-     * Create a memory-efficient reader for large Excel files
+     * Create a memory-efficient reader for large Excel files.
      */
     private function createChunkReader(string $filePath): IReader
     {
@@ -157,7 +164,7 @@ class ExcelImportService
     }
 
     /**
-     * Parse the header row to create a column index mapping
+     * Parse the header row to create a column index mapping.
      * 
      * @return array<string, string> Map of column name to column letter (A, B, C, etc.)
      */
@@ -199,7 +206,7 @@ class ExcelImportService
     }
 
     /**
-     * Extract data from a single row
+     * Extract data from a single row.
      * 
      * @return array<string, string|null>
      */
@@ -216,7 +223,7 @@ class ExcelImportService
     }
 
     /**
-     * Check if a row is empty (all required fields are null/empty)
+     * Check if a row is empty (all required fields are null/empty).
      */
     private function isEmptyRow(array $rowData): bool
     {
@@ -226,7 +233,7 @@ class ExcelImportService
     }
 
     /**
-     * Import a single row - creates new server or updates existing one
+     * Import a single row - creates new server or updates existing one.
      * 
      * @return string 'created' or 'updated'
      */
@@ -270,7 +277,7 @@ class ExcelImportService
     }
 
     /**
-     * Validate the file exists and is readable
+     * Validate the file exists and is readable.
      */
     private function validateFile(string $filePath): void
     {
@@ -293,7 +300,7 @@ class ExcelImportService
     }
 
     /**
-     * Call progress callback if provided
+     * Call progress callback if provided.
      */
     private function notify(?callable $callback, int $current, int $total, string $message): void
     {
@@ -307,7 +314,7 @@ class ExcelImportService
     // ========================================
 
     /**
-     * Parse RAM string to get size in GB
+     * Parse RAM string to get size in GB.
      * Examples: "16GBDDR3" -> 16, "128GBDDR4" -> 128
      */
     private function parseRamSize(string $ram): int
@@ -319,7 +326,7 @@ class ExcelImportService
     }
 
     /**
-     * Parse HDD string to get total storage in GB
+     * Parse HDD string to get total storage in GB.
      * Examples: 
      *   "2x2TBSATA2" -> 4000 (2 * 2TB = 4TB = 4000GB)
      *   "8x2TBSATA2" -> 16000 (8 * 2TB = 16TB = 16000GB)
@@ -344,7 +351,7 @@ class ExcelImportService
     }
 
     /**
-     * Parse HDD string to get disk type
+     * Parse HDD string to get disk type.
      * Examples:
      *   "2x2TBSATA2" -> "SATA"
      *   "4x480GBSSD" -> "SSD"
@@ -370,7 +377,7 @@ class ExcelImportService
     }
 
     /**
-     * Parse price string to extract amount and currency
+     * Parse price string to extract amount and currency.
      * Examples:
      *   "49.99" -> ['amount' => '49.99', 'currency' => 'EUR']
      *   "$105.99" -> ['amount' => '105.99', 'currency' => 'USD']
@@ -414,8 +421,8 @@ class ExcelImportService
     }
 
     /**
-     * Get estimated row count without loading full file
-     * Useful for progress estimation before import
+     * Get estimated row count without loading full file.
+     * Useful for progress estimation before import.
      */
     public function getEstimatedRowCount(string $filePath): int
     {
@@ -431,4 +438,3 @@ class ExcelImportService
         return $count;
     }
 }
-

@@ -16,12 +16,26 @@ use Symfony\Component\Serializer\SerializerInterface;
 /**
  * Server API Controller.
  *
- * OpenAPI documentation is in src/OpenApi/ServerApiDoc.php
+ * OpenAPI documentation is defined in config/packages/nelmio_api_doc.yaml
  * to keep this controller focused on business logic.
+ *
+ * Caching strategy:
+ * - Application cache: Results cached in ServerRepository (1 hour TTL)
+ * - HTTP cache: Browser/CDN caching via Cache-Control headers (5 min)
  */
 #[Route('/api', name: 'api_')]
 class ServerController extends AbstractController
 {
+    /**
+     * HTTP cache max-age for browser caching (5 minutes).
+     */
+    private const HTTP_CACHE_MAX_AGE = 300;
+
+    /**
+     * HTTP cache shared max-age for CDN/proxy caching (10 minutes).
+     */
+    private const HTTP_CACHE_SHARED_MAX_AGE = 600;
+
     public function __construct(
         private readonly ServerRepository $serverRepository,
         private readonly ServerFilterService $filterService,
@@ -48,7 +62,7 @@ class ServerController extends AbstractController
 
         $data = $this->serializer->normalize($result['servers'], 'json', ['groups' => 'server:list']);
 
-        return $this->json([
+        $response = $this->json([
             'data' => $data,
             'meta' => [
                 'total' => $result['total'],
@@ -62,6 +76,11 @@ class ServerController extends AbstractController
             ],
             'filters' => $filters,
         ]);
+
+        // Add HTTP cache headers for browser/CDN caching
+        $this->addCacheHeaders($response);
+
+        return $response;
     }
 
     /**
@@ -81,9 +100,14 @@ class ServerController extends AbstractController
 
         $data = $this->serializer->normalize($server, 'json', ['groups' => 'server:detail']);
 
-        return $this->json([
+        $response = $this->json([
             'data' => $data,
         ]);
+
+        // Add HTTP cache headers
+        $this->addCacheHeaders($response);
+
+        return $response;
     }
 
     /**
@@ -92,8 +116,37 @@ class ServerController extends AbstractController
     #[Route('/filters', name: 'filters', methods: ['GET'])]
     public function filters(): JsonResponse
     {
-        return $this->json([
+        $response = $this->json([
             'data' => $this->filterService->getAvailableFilters(),
         ]);
+
+        // Filter options rarely change - cache longer
+        $this->addCacheHeaders($response, self::HTTP_CACHE_MAX_AGE * 2);
+
+        return $response;
+    }
+
+    /**
+     * Add HTTP cache headers to response.
+     * Enables browser and CDN/proxy caching for better performance.
+     */
+    private function addCacheHeaders(JsonResponse $response, ?int $maxAge = null): void
+    {
+        $maxAge = $maxAge ?? self::HTTP_CACHE_MAX_AGE;
+
+        // Allow public caching (browsers, CDNs, proxies)
+        $response->setPublic();
+
+        // Browser cache duration
+        $response->setMaxAge($maxAge);
+
+        // CDN/proxy cache duration (can be longer than browser cache)
+        $response->setSharedMaxAge(self::HTTP_CACHE_SHARED_MAX_AGE);
+
+        // ETag for conditional requests (304 Not Modified)
+        $response->setEtag(md5($response->getContent()));
+
+        // Vary header - cache varies by these request headers
+        $response->headers->set('Vary', 'Accept, Accept-Encoding');
     }
 }

@@ -10,19 +10,35 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @extends ServiceEntityRepository<Server>
  */
 class ServerRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    /**
+     * Cache TTL in seconds (1 hour).
+     * Server data rarely changes, so we cache aggressively.
+     */
+    private const CACHE_TTL = 3600;
+
+    /**
+     * Cache key prefix for server queries.
+     */
+    private const CACHE_PREFIX = 'servers_';
+
+    public function __construct(
+        ManagerRegistry $registry,
+        private readonly CacheItemPoolInterface $serverCache
+    ) {
         parent::__construct($registry, Server::class);
     }
 
     /**
-     * Find servers with filters, pagination, and sorting
+     * Find servers with filters, pagination, and sorting.
+     * Results are cached for performance.
      *
      * @param array<string, mixed> $filters
      * @param array{sort: string, order: string} $sorting
@@ -34,11 +50,41 @@ class ServerRepository extends ServiceEntityRepository
         int $limit = 20,
         array $sorting = ['sort' => 'price', 'order' => 'asc']
     ): array {
+        $cacheKey = $this->generateCacheKey($filters, $page, $limit, $sorting);
+
+        $cacheItem = $this->serverCache->getItem($cacheKey);
+
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        // Execute query when cache miss
+        $result = $this->executeFilterQuery($filters, $page, $limit, $sorting);
+
+        // Cache the result
+        $cacheItem->set($result);
+        $cacheItem->expiresAfter(self::CACHE_TTL);
+        $this->serverCache->save($cacheItem);
+
+        return $result;
+    }
+
+    /**
+     * Execute the actual database query (used on cache miss).
+     *
+     * @param array<string, mixed> $filters
+     * @param array{sort: string, order: string} $sorting
+     * @return array{servers: Server[], total: int, page: int, limit: int, totalPages: int}
+     */
+    private function executeFilterQuery(
+        array $filters,
+        int $page,
+        int $limit,
+        array $sorting
+    ): array {
         $qb = $this->createQueryBuilder('s');
 
         $this->applyFilters($qb, $filters);
-
-        // Apply sorting
         $this->applySorting($qb, $sorting);
 
         // Pagination
@@ -59,7 +105,38 @@ class ServerRepository extends ServiceEntityRepository
     }
 
     /**
-     * Apply sorting to query builder
+     * Generate a unique cache key based on query parameters.
+     *
+     * @param array<string, mixed> $filters
+     * @param array{sort: string, order: string} $sorting
+     */
+    private function generateCacheKey(array $filters, int $page, int $limit, array $sorting): string
+    {
+        // Sort arrays to ensure consistent key generation
+        ksort($filters);
+
+        $keyData = [
+            'f' => $filters,
+            'p' => $page,
+            'l' => $limit,
+            's' => $sorting,
+        ];
+
+        return self::CACHE_PREFIX . md5(serialize($keyData));
+    }
+
+    /**
+     * Invalidate all server-related cache entries.
+     * Call this method when server data is updated (import, edit, delete).
+     */
+    public function invalidateCache(): void
+    {
+        // Clear all items from the server cache pool
+        $this->serverCache->clear();
+    }
+
+    /**
+     * Apply sorting to query builder.
      *
      * @param array{sort: string, order: string} $sorting
      */
@@ -79,7 +156,7 @@ class ServerRepository extends ServiceEntityRepository
     }
 
     /**
-     * Apply filters to query builder
+     * Apply filters to query builder.
      *
      * @param array<string, mixed> $filters
      */
@@ -140,8 +217,8 @@ class ServerRepository extends ServiceEntityRepository
     }
 
     /**
-     * Parse storage range string into min/max GB values
-     * Uses constants from ServerFilterService to avoid duplication
+     * Parse storage range string into min/max GB values.
+     * Uses constants from ServerFilterService to avoid duplication.
      *
      * @return array{0: int, 1: int|null}
      */
@@ -159,7 +236,7 @@ class ServerRepository extends ServiceEntityRepository
     }
 
     /**
-     * Parse RAM value string to integer GB
+     * Parse RAM value string to integer GB.
      */
     private function parseRamValue(string $value): int
     {
@@ -169,20 +246,30 @@ class ServerRepository extends ServiceEntityRepository
     }
 
     /**
-     * Get all distinct locations
+     * Get all distinct locations.
+     * Results are cached.
      *
      * @return string[]
      */
     public function getDistinctLocations(): array
     {
+        $cacheKey = self::CACHE_PREFIX . 'locations';
+        $cacheItem = $this->serverCache->getItem($cacheKey);
+
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
         $result = $this->createQueryBuilder('s')
             ->select('DISTINCT s.location')
             ->orderBy('s.location', 'ASC')
             ->getQuery()
             ->getSingleColumnResult();
 
+        $cacheItem->set($result);
+        $cacheItem->expiresAfter(self::CACHE_TTL);
+        $this->serverCache->save($cacheItem);
+
         return $result;
     }
-
 }
-
